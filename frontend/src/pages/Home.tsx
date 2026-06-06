@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type ChangeEvent } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -82,7 +82,7 @@ export default function Home() {
               id="role"
               placeholder="e.g. Frontend Developer, Product Manager"
               value={role}
-              onChange={(e) => setRole(e.target.value)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setRole(e.target.value)}
               className="h-12 text-lg"
             />
           </div>

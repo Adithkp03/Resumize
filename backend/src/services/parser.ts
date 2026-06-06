@@ -1,12 +1,13 @@
 import fs from 'fs';
-import pdfParse from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
 
 export async function parseResume(filePath: string, mimeType: string): Promise<string> {
   try {
     if (mimeType === 'application/pdf') {
       const dataBuffer = fs.readFileSync(filePath);
-      const data = await pdfParse(dataBuffer);
+      const parser = new PDFParse({ data: dataBuffer });
+      const data = await parser.getText();
       return data.text;
     } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimeType === 'application/msword') {
       const result = await mammoth.extractRawText({ path: filePath });
