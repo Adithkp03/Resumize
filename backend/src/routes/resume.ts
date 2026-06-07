@@ -11,7 +11,7 @@ const upload = multer({ dest: 'uploads/' });
 router.post('/analyze', upload.single('resume'), async (req, res) => {
   try {
     const file = req.file;
-    const { role } = req.body;
+    const { role, jobDescription } = req.body;
 
     if (!file) {
       return res.status(400).json({ error: 'No resume uploaded' });
@@ -24,7 +24,7 @@ router.post('/analyze', upload.single('resume'), async (req, res) => {
     const text = await parseResume(file.path, file.mimetype);
 
     // 2. Analyze with AI
-    const analysis = await analyzeResume(text, role);
+    const analysis = await analyzeResume(text, role, jobDescription);
 
     // 3. Save to Database
     const db = getDb();

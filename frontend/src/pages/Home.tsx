@@ -5,12 +5,14 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { UploadCloud, File, Loader2 } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [role, setRole] = useState('');
+  const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -48,6 +50,9 @@ export default function Home() {
     const formData = new FormData();
     formData.append('resume', file);
     formData.append('role', role);
+    if (jobDescription.trim()) {
+      formData.append('jobDescription', jobDescription);
+    }
 
     try {
       const response = await axios.post('http://localhost:5000/api/resume/analyze', formData, {
@@ -77,13 +82,24 @@ export default function Home() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="role" className="text-base">Target Job Role</Label>
+            <Label htmlFor="role" className="text-base">Target Job Role <span className="text-destructive">*</span></Label>
             <Input
               id="role"
               placeholder="e.g. Frontend Developer, Product Manager"
               value={role}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setRole(e.target.value)}
               className="h-12 text-lg"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="jobDescription" className="text-base">Job Description (Optional, but recommended)</Label>
+            <Textarea
+              id="jobDescription"
+              placeholder="Paste the job description here for highly accurate matching..."
+              value={jobDescription}
+              onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setJobDescription(e.target.value)}
+              className="min-h-[120px] text-base resize-y"
             />
           </div>
 
