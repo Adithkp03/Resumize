@@ -15,7 +15,8 @@ export default function History() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/resume/history');
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const response = await axios.get(`${API_URL}/resume/history`);
         setHistory(response.data);
       } catch (error) {
         console.error('Failed to fetch history', error);
