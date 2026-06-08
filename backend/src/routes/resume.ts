@@ -5,8 +5,10 @@ import { analyzeResume } from '../services/ai';
 import { supabase } from '../db/database';
 import fs from 'fs';
 
+import os from 'os';
+
 const router = Router();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ dest: os.tmpdir() });
 
 router.post('/analyze', upload.single('resume'), async (req, res) => {
   try {

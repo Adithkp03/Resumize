@@ -2,9 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import resumeRoutes from './routes/resume';
-
+// Load .env BEFORE any other imports that depend on env vars
 dotenv.config();
+
+import resumeRoutes from './routes/resume';
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -30,9 +31,14 @@ app.use(cors({
 
 app.use(express.json());
 
-// Health check endpoint for Render
+// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Root endpoint
+app.get('/', (req, res) => {
+  res.status(200).send('Resumize Backend API is running!');
 });
 
 // Routes
@@ -49,11 +55,9 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(status).json({ error: message });
 });
 
-// Server start (only if not running in Vercel serverless environment)
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
-}
+// Start server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 
 export default app;
