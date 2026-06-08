@@ -1,14 +1,17 @@
 import Groq from "groq-sdk";
-import dotenv from "dotenv";
 
-dotenv.config();
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+let _groq: Groq | null = null;
+function getGroq(): Groq {
+  if (!_groq) {
+    _groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  }
+  return _groq;
+}
 const MODEL = "llama-3.3-70b-versatile";
 
 async function callGroq(prompt: string) {
   try {
-    const chatCompletion = await groq.chat.completions.create({
+    const chatCompletion = await getGroq().chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: MODEL,
       temperature: 0.2,
