@@ -49,7 +49,11 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(status).json({ error: message });
 });
 
-// Server start
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+// Server start (only if not running in Vercel serverless environment)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+export default app;
