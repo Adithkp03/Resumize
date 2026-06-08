@@ -1,32 +1,14 @@
-import sqlite3 from 'sqlite3';
-import { open, Database } from 'sqlite';
-import path from 'path';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
-let db: Database<sqlite3.Database, sqlite3.Statement> | null = null;
+dotenv.config();
 
-export async function initDb() {
-  db = await open({
-    filename: path.join(__dirname, '../../database.sqlite'),
-    driver: sqlite3.Database
-  });
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS analyses (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      filename TEXT NOT NULL,
-      target_role TEXT NOT NULL,
-      ats_score INTEGER,
-      analysis_result TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  return db;
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing SUPABASE_URL or SUPABASE_ANON_KEY in environment variables');
 }
 
-export function getDb() {
-  if (!db) {
-    throw new Error('Database not initialized');
-  }
-  return db;
-}
+// Create a single supabase client for interacting with your database
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

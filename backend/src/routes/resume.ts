@@ -2,7 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { parseResume } from '../services/parser';
 import { analyzeResume } from '../services/ai';
-import { getDb } from '../db/database';
+import { supabase } from '../db/database';
 import fs from 'fs';
 
 const router = Router();
@@ -27,11 +27,23 @@ router.post('/analyze', upload.single('resume'), async (req, res) => {
     const analysis = await analyzeResume(text, role, jobDescription);
 
     // 3. Save to Database
-    const db = getDb();
-    await db.run(
-      `INSERT INTO analyses (filename, target_role, ats_score, analysis_result) VALUES (?, ?, ?, ?)`,
-      [file.originalname, role, analysis.ats_score, JSON.stringify(analysis)]
-    );
+    const { error: dbError } = await supabase
+      .from('analyses')
+      .insert([
+        {
+          filename: file.originalname,
+          target_role: role,
+          ats_score: analysis.ats_score,
+          analysis_result: analysis
+        }
+      ]);
+
+    if (dbError) {
+      console.error('Failed to save to Supabase:', dbError);
+      // We don't necessarily want to fail the whole request if DB save fails, 
+      // but let's throw for now to make sure errors are caught.
+      throw new Error(`Database save failed: ${dbError.message}`);
+    }
 
     // Cleanup uploaded file
     fs.unlinkSync(file.path);
@@ -46,16 +58,18 @@ router.post('/analyze', upload.single('resume'), async (req, res) => {
 
 router.get('/history', async (req, res) => {
   try {
-    const db = getDb();
-    const history = await db.all(`SELECT * FROM analyses ORDER BY created_at DESC`);
+    const { data: history, error } = await supabase
+      .from('analyses')
+      .select('*')
+      .order('created_at', { ascending: false });
     
-    // Parse the analysis_result JSON string back into an object
-    const parsedHistory = history.map((item: any) => ({
-      ...item,
-      analysis_result: JSON.parse(item.analysis_result)
-    }));
+    if (error) {
+      throw new Error(error.message);
+    }
 
-    res.json(parsedHistory);
+    // Supabase returns the JSONB column already parsed as an object,
+    // so we don't need to JSON.parse(item.analysis_result) like we did with SQLite.
+    res.json(history || []);
   } catch (error: any) {
     console.error('History error:', error);
     res.status(500).json({ error: 'Failed to retrieve history' });

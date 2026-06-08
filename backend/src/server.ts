@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { initDb } from './db/database';
+
 import resumeRoutes from './routes/resume';
 
 dotenv.config();
@@ -49,12 +49,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(status).json({ error: message });
 });
 
-// Database initialization & Server start
-initDb().then(() => {
-  console.log('Database connected');
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
-}).catch(err => {
-  console.error('Failed to initialize database:', err);
+// Server start
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
