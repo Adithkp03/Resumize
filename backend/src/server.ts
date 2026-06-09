@@ -13,7 +13,7 @@ const port = process.env.PORT || 5000;
 // CORS Configuration
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://resumize-front.vercel.app/', // Local development
+  'https://resumize-front.vercel.app', // Local development
   process.env.FRONTEND_URL // Production Vercel URL
 ].filter(Boolean) as string[];
 console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
