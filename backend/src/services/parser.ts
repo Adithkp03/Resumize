@@ -2,22 +2,32 @@ import fs from 'fs';
 import mammoth from 'mammoth';
 
 export async function parseResume(filePath: string, mimeType: string): Promise<string> {
-  try {
-    if (mimeType === 'application/pdf') {
-      const dataBuffer = fs.readFileSync(filePath);
-      const { extractText, getDocumentProxy } = await import('unpdf');
-      const pdf = await getDocumentProxy(new Uint8Array(dataBuffer));
-      const { text } = await extractText(pdf, { mergePages: true });
-      return text;
-    } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimeType === 'application/msword') {
-      const result = await mammoth.extractRawText({ path: filePath });
-      return result.value;
-    } else {
-      throw new Error('Unsupported file format. Please upload PDF or DOCX.');
+  if (mimeType === 'application/pdf') {
+    const dataBuffer = fs.readFileSync(filePath);
+    let extractText: any, getDocumentProxy: any;
+    try {
+      const unpdf = await import('unpdf');
+      extractText = unpdf.extractText;
+      getDocumentProxy = unpdf.getDocumentProxy;
+    } catch (importError: any) {
+      console.error('Failed to import unpdf:', importError);
+      throw new Error(`PDF parser module failed to load: ${importError.message}`);
     }
-  } catch (error) {
-    console.error('Error parsing resume:', error);
-    throw new Error('Failed to parse the resume file.');
+    try {
+      const pdf = await getDocumentProxy(new Uint8Array(dataBuffer));
+      const result = await extractText(pdf, { mergePages: true });
+      return result.text;
+    } catch (parseError: any) {
+      console.error('Failed to parse PDF:', parseError);
+      throw new Error(`PDF parsing failed: ${parseError.message}`);
+    }
+  } else if (
+    mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+    mimeType === 'application/msword'
+  ) {
+    const result = await mammoth.extractRawText({ path: filePath });
+    return result.value;
+  } else {
+    throw new Error('Unsupported file format. Please upload PDF or DOCX.');
   }
 }
-

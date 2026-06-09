@@ -39,6 +39,34 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Debug endpoint - check module availability
+app.get('/debug', async (req, res) => {
+  const checks: Record<string, string> = {};
+  try {
+    await import('unpdf');
+    checks.unpdf = 'ok';
+  } catch (e: any) {
+    checks.unpdf = `FAIL: ${e.message}`;
+  }
+  try {
+    require('mammoth');
+    checks.mammoth = 'ok';
+  } catch (e: any) {
+    checks.mammoth = `FAIL: ${e.message}`;
+  }
+  try {
+    require('groq-sdk');
+    checks.groq = 'ok';
+  } catch (e: any) {
+    checks.groq = `FAIL: ${e.message}`;
+  }
+  checks.node_version = process.version;
+  checks.env_groq_key = process.env.GROQ_API_KEY ? 'set' : 'MISSING';
+  checks.env_supabase_url = process.env.SUPABASE_URL ? 'set' : 'MISSING';
+  checks.env_supabase_key = (process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY) ? 'set' : 'MISSING';
+  res.json(checks);
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.status(200).send('Resumize Backend API is running!');
