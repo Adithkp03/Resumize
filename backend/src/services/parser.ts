@@ -1,14 +1,14 @@
 import fs from 'fs';
-import { PDFParse } from 'pdf-parse';
 import mammoth from 'mammoth';
 
 export async function parseResume(filePath: string, mimeType: string): Promise<string> {
   try {
     if (mimeType === 'application/pdf') {
       const dataBuffer = fs.readFileSync(filePath);
-      const parser = new PDFParse({ data: dataBuffer });
-      const data = await parser.getText();
-      return data.text;
+      const { extractText, getDocumentProxy } = await import('unpdf');
+      const pdf = await getDocumentProxy(new Uint8Array(dataBuffer));
+      const { text } = await extractText(pdf, { mergePages: true });
+      return text;
     } else if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimeType === 'application/msword') {
       const result = await mammoth.extractRawText({ path: filePath });
       return result.value;
@@ -20,3 +20,4 @@ export async function parseResume(filePath: string, mimeType: string): Promise<s
     throw new Error('Failed to parse the resume file.');
   }
 }
+

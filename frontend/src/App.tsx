@@ -25,7 +25,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
-        <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
           <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
             <nav className="flex items-center space-x-6 text-sm font-medium">
               <Link to="/" className="text-foreground transition-colors hover:text-foreground/80 font-bold text-lg">
