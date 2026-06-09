@@ -15,6 +15,8 @@ const allowedOrigins = [
   'http://localhost:5173', // Local development
   process.env.FRONTEND_URL // Production Vercel URL
 ].filter(Boolean) as string[];
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+console.log("Allowed Origins:", allowedOrigins);
 
 app.use(cors({
   origin: function (origin, callback) {
